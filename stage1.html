@@ -30,6 +30,10 @@
       cursor: pointer;
       font-size: 16px;
     }
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
     #timer {
       font-size: 18px;
       margin-bottom: 20px;
@@ -47,7 +51,9 @@
   <div id="quiz"></div>
 
   <center>
-    <button id="continueBtn" type="button" disabled>Continue</button>
+    <button id="continueBtn" type="button" onclick="finish()" disabled>
+      Continue
+    </button>
   </center>
 </div>
 
@@ -56,14 +62,14 @@
 <script>
 /* ================= CONFIG ================= */
 
-// 🔐 Supabase (PUBLIC ANON KEY ONLY)
+// Supabase (PUBLIC ANON KEY ONLY)
 const SUPABASE_URL = "https://vjkgawgkbehsqqtqwgic.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZqa2dhd2drYmVoc3FxdHF3Z2ljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg0NTI2NDEsImV4cCI6MjA4NDAyODY0MX0.D8rXN-7kn6UFwg6z03Pk_8XlO-G-iVbZwBw1Nx6sa-w"; // 👈 replace only this
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZqa2dhd2drYmVoc3FxdHF3Z2ljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg0NTI2NDEsImV4cCI6MjA4NDAyODY0MX0.D8rXN-7kn6UFwg6z03Pk_8XlO-G-iVbZwBw1Nx6sa-w";
 
-// 🌐 Backend (Render)
+// Backend (Render)
 const BACKEND_URL = "https://coding-backend-iej3.onrender.com";
 
-// Initialize Supabase
+// Init Supabase
 const supabaseClient = supabase.createClient(
   SUPABASE_URL,
   SUPABASE_ANON_KEY
@@ -71,22 +77,19 @@ const supabaseClient = supabase.createClient(
 
 let userId = null;
 
-/* ================= AUTH GUARD ================= */
+/* ================= AUTH (CORRECT WAY) ================= */
 
-async function getUser() {
-  const { data: { user }, error } = await supabaseClient.auth.getUser();
-
-  if (!user) {
+supabaseClient.auth.onAuthStateChange((event, session) => {
+  if (!session || !session.user) {
     window.location.href = "index.html";
     return;
   }
 
-  userId = user.id;
+  userId = session.user.id;
 
-  // ✅ enable button ONLY after user is ready
+  // Enable Continue button ONLY after auth is ready
   document.getElementById("continueBtn").disabled = false;
-}
-
+});
 
 /* ================= MCQS ================= */
 
@@ -146,10 +149,8 @@ const timer = setInterval(() => {
 /* ================= SUBMIT ================= */
 
 async function finish() {
-  console.log("✅ Continue clicked");
-
   if (!userId) {
-    alert("User not loaded yet. Please wait 1–2 seconds.");
+    alert("Please wait, user is loading...");
     return;
   }
 
@@ -159,9 +160,6 @@ async function finish() {
   MCQS.forEach((q, i) => {
     if (answers[i] === q.answer) score++;
   });
-
-  console.log("📊 Score:", score);
-  console.log("👤 User:", userId);
 
   try {
     const res = await fetch(`${BACKEND_URL}/round1/submit`, {
@@ -173,31 +171,19 @@ async function finish() {
       })
     });
 
-    console.log("🌐 Backend status:", res.status);
-
     if (!res.ok) {
-      const text = await res.text();
-      console.error(text);
-      throw new Error("Backend failed");
+      throw new Error("Backend error");
     }
 
-    // ✅ FORCE redirect
-    window.location.assign("stage2.html");
+    // ✅ Redirect ONLY after successful save
+    window.location.href = "stage2.html";
 
   } catch (err) {
-    console.error("❌ Submit error:", err);
-    alert("Error saving score. Contact admin.");
+    console.error(err);
+    alert("❌ Error saving score. Contact admin.");
   }
 }
-
-/* ================= INIT ================= */
-
-document.addEventListener("DOMContentLoaded", async () => {
-  await getUser();
-});
-
 </script>
-
 
 </body>
 </html>
