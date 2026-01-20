@@ -1,252 +1,177 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<title>Round 1 – MCQs</title>
-
-<style>
-:root{
-  --bg-dark:#0a0a0f;
-  --glass:rgba(255,255,255,0.06);
-  --border:rgba(255,255,255,0.12);
-  --accent:#ff3d5a;
-  --accent2:#ffd700;
-  --text:#ffffff;
-  --muted:rgba(255,255,255,0.6);
-}
-
-*{box-sizing:border-box}
-
-body{
-  margin:0;
-  font-family:"Space Grotesk",Arial,sans-serif;
-  background:linear-gradient(135deg,#0a0a0f,#140018);
-  color:var(--text);
-}
-
-.container{
-  max-width:1000px;
-  margin:120px auto 80px;
-  padding:0 20px;
-}
-
-.header{
-  text-align:center;
-  margin-bottom:40px;
-}
-
-.header h1{
-  font-size:2.5rem;
-  margin-bottom:10px;
-  background:linear-gradient(135deg,var(--accent),var(--accent2));
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
-}
-
-.timer{
-  position:sticky;
-  top:20px;
-  z-index:10;
-  text-align:center;
-  padding:12px;
-  background:var(--glass);
-  backdrop-filter:blur(20px);
-  border:1px solid var(--border);
-  border-radius:14px;
-  margin-bottom:30px;
-  font-weight:600;
-  letter-spacing:1px;
-}
-
-.quiz{
-  display:flex;
-  flex-direction:column;
-  gap:22px;
-}
-
-.question{
-  background:var(--glass);
-  border:1px solid var(--border);
-  border-radius:20px;
-  padding:24px;
-  transition:0.3s;
-}
-
-.question:hover{
-  border-color:var(--accent);
-}
-
-.question-title{
-  font-weight:600;
-  margin-bottom:16px;
-  font-size:1.05rem;
-}
-
-.options label{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  padding:12px 16px;
-  border-radius:12px;
-  cursor:pointer;
-  transition:0.2s;
-  color:var(--muted);
-}
-
-.options label:hover{
-  background:rgba(255,255,255,0.08);
-  color:#fff;
-}
-
-.options input{
-  accent-color:var(--accent);
-}
-
-.footer{
-  text-align:center;
-  margin-top:40px;
-}
-
-button{
-  padding:16px 46px;
-  font-size:1rem;
-  font-weight:600;
-  border:none;
-  border-radius:16px;
-  cursor:pointer;
-  color:#fff;
-  background:linear-gradient(135deg,var(--accent),#ff6b6b);
-  transition:0.3s;
-}
-
-button:hover{
-  transform:translateY(-3px);
-  box-shadow:0 12px 40px rgba(255,61,90,0.4);
-}
-
-button:disabled{
-  opacity:0.6;
-  cursor:not-allowed;
-}
-</style>
+  <title>Round 1 – MCQs</title>
+  <style>
+    body { font-family: Arial; background:#222; color:#fff; }
+    .box { max-width:900px; margin:auto; background:#333; padding:20px; }
+    .q { background:#444; padding:10px; margin-bottom:10px; }
+    button { padding:10px 20px; font-size:16px; }
+  </style>
 </head>
 
 <body>
 
-<div class="container">
+<div class="box">
+  <h2>Round 1 – MCQs</h2>
+  <p id="timer">15:00</p>
 
-  <div class="header">
-    <h1>🧠 Round 1 – MCQ Challenge</h1>
-    <p style="color:var(--muted)">Answer all questions before time runs out</p>
-  </div>
+  <div id="quiz"></div>
 
-  <div class="timer" id="timer">15:00</div>
-
-  <div class="quiz" id="quiz"></div>
-
-  <div class="footer">
-    <button id="continueBtn" onclick="finish()">Submit & Continue</button>
-  </div>
-
+  <button id="submitBtn" onclick="submitQuiz()">Submit</button>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <script>
-/* ========= KEEPING YOUR LOGIC SAME ========= */
-
-const SUPABASE_URL = "https://vjkgawgkbehsqqtqwgic.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZqa2dhd2drYmVoc3FxdHF3Z2ljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg0NTI2NDEsImV4cCI6MjA4NDAyODY0MX0.D8rXN-7kn6UFwg6z03Pk_8XlO-G-iVbZwBw1Nx6sa-w";
+/* ================= CONFIG ================= */
 
 const supabaseClient = supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_ANON_KEY
+  "https://vjkgawgkbehsqqtqwgic.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZqa2dhd2drYmVoc3FxdHF3Z2ljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg0NTI2NDEsImV4cCI6MjA4NDAyODY0MX0.D8rXN-7kn6UFwg6z03Pk_8XlO-G-iVbZwBw1Nx6sa-w"
 );
 
 let userId = null;
 
-async function loadUser(){
-  const { data } = await supabaseClient.auth.getSession();
-  if(!data.session){
-    window.location.href="index.html";
+/* ================= AUTH ================= */
+
+supabaseClient.auth.onAuthStateChange((event, session) => {
+  if (!session) {
+    window.location.href = "index.html";
     return;
   }
-  userId = data.session.user.id;
-}
-loadUser();
+  userId = session.user.id;
+});
 
-/* ========= MCQs (YOUR DATA) ========= */
+/* ================= QUESTIONS (15) ================= */
 
 const MCQS = [
-  { q:"Which loop in C is guaranteed to execute at least once?", o:["nested for","do-while","while","for"], a:1 },
-  { q:"Which of the following correctly describes a pointer in C?", o:["It stores a character","It stores a function","It stores an address","It stores a value"], a:2 },
-  { q:"Which header file is required for printf()?", o:["math.h","stdio.h","string.h","stdlib.h"], a:1 },
-  { q:"Which operator is used to access the value at an address?", o:["%","#","&","*"], a:3 },
-  { q:"Which of the following is TRUE about break statement?", o:["It exits the loop or switch","It exits the program","It ends the function","It skips the current iteration"], a:0 },
-  { q:"Which of the following is a valid C variable name?", o:["num-1","int","1num","_num"], a:3 },
-  { q:"Which memory is allocated by malloc()?", o:["Register","Heap","Stack","Static"], a:1 },
-  { q:"Which operator is used for logical AND?", o:["|","||","&&","&"], a:2 },
-  { q:"Which function is used to compare two strings in C?", o:["strlen()","strcat()","strcmp()","strcpy()"], a:2 },
-  { q:"What does sizeof(int) return?", o:["Address","Number of bytes","Number of digits","Number of bits"], a:1 },
-  { q:"Which of the following is a correct comment in C?", o:["# comment","** comment **","// comment","<!-- comment -->"], a:2 },
-  { q:"What happens if an array index is accessed beyond its size?", o:["Program terminates safely","Undefined behavior","Compile-time error","Runtime error always"], a:1 },
-  { q:"Which function is used to read a string with spaces in C?", o:["puts()","scanf()","gets()","fgets()"], a:3 },
-  { q:"What is the default return type of main() in C?", o:["float","void","char","int"], a:3 },
-  { q:"Which of the following is TRUE about functions in C?", o:["Functions cannot be recursive","Function arguments are passed by value by default","Functions must always return a value","Functions can return multiple values directly"], a:1 }
+  { q:"Which loop in C is guaranteed to execute at least once?", 
+    o:["nested for","do-while","while","for"], 
+    a:1 },
+
+  { q:"Which of the following correctly describes a pointer in C?", 
+    o:["It stores a character","It stores a function","It stores an address","It stores a value"], 
+    a:2 },
+
+  { q:"Which header file is required for printf()?", 
+    o:["math.h","stdio.h","string.h","stdlib.h"], 
+    a:1 },
+
+  { q:"Which operator is used to access the value at an address?", 
+    o:["%","#","&","*"], 
+    a:3 },
+
+  { q:"Which of the following is TRUE about break statement?", 
+    o:["It exits the loop or switch","It exits the program","It ends the function","It skips the current iteration"], 
+    a:0 },
+
+  { q:"Which of the following is a valid C variable name?", 
+    o:["num-1","int","1num","_num"], 
+    a:3 },
+
+  { q:"Which memory is allocated by malloc()?", 
+    o:["Register","Heap","Stack","Static"], 
+    a:1 },
+
+  { q:"Which operator is used for logical AND?", 
+    o:["|","||","&&","&"], 
+    a:2 },
+
+  { q:"Which function is used to compare two strings in C?", 
+    o:["strlen()","strcat()","strcmp()","strcpy()"], 
+    a:2 },
+
+  { q:"What does sizeof(int) return?", 
+    o:["Address","Number of bytes","Number of digits","Number of bits"], 
+    a:1 },
+
+  { q:"Which of the following is a correct comment in C?", 
+    o:["# comment","** comment **","// comment","<!-- comment -->"], 
+    a:2 },
+
+  { q:"What happens if an array index is accessed beyond its size?", 
+    o:["Program terminates safely","Undefined behavior","Compile-time error","Runtime error always"], 
+    a:1 },
+
+  { q:"Which function is used to read a string with spaces in C?", 
+    o:["puts()","scanf()","gets()","fgets()"], 
+    a:3 },
+
+  { q:"What is the default return type of main() in C?", 
+    o:["float","void","char","int"], 
+    a:3 },
+
+  { q:"Which of the following is TRUE about functions in C?", 
+    o:["Functions cannot be recursive","Function arguments are passed by value by default","Functions must always return a value","Functions can return multiple values directly"], 
+    a:1 }
 ];
 
 const answers = Array(MCQS.length).fill(-1);
 
+/* ================= RENDER ================= */
+
 const quiz = document.getElementById("quiz");
 
-MCQS.forEach((q,i)=>{
-  const div=document.createElement("div");
-  div.className="question";
-  div.innerHTML=`<div class="question-title">Q${i+1}. ${q.q}</div>`;
-  const opts=document.createElement("div");
-  opts.className="options";
-
-  q.o.forEach((opt,j)=>{
-    opts.innerHTML+=`
+MCQS.forEach((q, i) => {
+  const div = document.createElement("div");
+  div.className = "q";
+  div.innerHTML = `<b>Q${i+1}. ${q.q}</b><br>`;
+  q.o.forEach((opt, j) => {
+    div.innerHTML += `
       <label>
         <input type="radio" name="q${i}" value="${j}">
         ${opt}
-      </label>`;
+      </label><br>`;
   });
-
-  div.appendChild(opts);
   quiz.appendChild(div);
 });
 
-document.addEventListener("change",e=>{
-  if(e.target.type==="radio"){
-    answers[Number(e.target.name.replace("q",""))]=Number(e.target.value);
+/* ================= CAPTURE ================= */
+
+document.addEventListener("change", e => {
+  if (e.target.type === "radio") {
+    const i = Number(e.target.name.replace("q",""));
+    answers[i] = Number(e.target.value);
   }
 });
 
-/* ========= TIMER ========= */
+/* ================= TIMER ================= */
 
-let time=15*60;
-const timer=setInterval(()=>{
-  const m=Math.floor(time/60);
-  const s=time%60;
-  document.getElementById("timer").innerText=
-    `Time Left: ${m}:${s<10?"0"+s:s}`;
+let time = 15 * 60;
+const timer = setInterval(() => {
+  const m = Math.floor(time / 60);
+  const s = time % 60;
+  document.getElementById("timer").innerText =
+    `${m}:${s < 10 ? "0"+s : s}`;
   time--;
-  if(time<0) finish();
-},1000);
+  if (time < 0) submitQuiz();
+}, 1000);
 
-/* ========= SUBMIT (UNCHANGED FLOW) ========= */
+/* ================= SUBMIT ================= */
 
-async function finish(){
+async function submitQuiz() {
   clearInterval(timer);
-  let score=0;
-  MCQS.forEach((q,i)=>{ if(answers[i]===q.a) score++; });
 
-  await supabaseClient.from("round1_scores")
-    .insert([{ user_id:userId, score }]);
+  let score = 0;
+  MCQS.forEach((q,i) => {
+    if (answers[i] === q.a) score++;
+  });
 
-  window.location.href="dashboard.html";
+  const { error } = await supabaseClient
+    .from("round1_scores")
+    .upsert({
+      user_id: userId,
+      score: score
+    });
+
+  if (error) {
+    alert("Error saving score");
+    console.error(error);
+    return;
+  }
+
+  alert("Round 1 submitted! Score: " + score);
+  window.location.href = "dashboard.html";
 }
 </script>
 
