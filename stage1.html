@@ -1,109 +1,181 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Round 1 – MCQs</title>
-  <style>
-    body { font-family: Arial; background:#222; color:#fff; }
-    .box { max-width:900px; margin:auto; background:#333; padding:20px; }
-    .q { background:#444; padding:10px; margin-bottom:10px; }
-    button { padding:10px 20px; font-size:16px; }
-  </style>
+<meta charset="UTF-8">
+<title>Round 1 – MCQ Test</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#0a0a0f;
+  --glass:rgba(255,255,255,0.06);
+  --border:rgba(255,255,255,0.14);
+  --accent:#ff3d5a;
+  --gold:#ffd700;
+  --text:#ffffff;
+  --dim:rgba(255,255,255,0.65);
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Space Grotesk',sans-serif;
+}
+
+.container{
+  max-width:1000px;
+  margin:60px auto 140px;
+  padding:0 20px;
+}
+
+.header{
+  text-align:center;
+  margin-bottom:40px;
+}
+
+.header h1{
+  font-family:'Syne',sans-serif;
+  font-size:3rem;
+  background:linear-gradient(135deg,var(--accent),var(--gold));
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+
+.timer{
+  margin-top:10px;
+  font-weight:600;
+  color:var(--gold);
+}
+
+.question{
+  background:var(--glass);
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:22px 26px;
+  margin-bottom:20px;
+}
+
+.question h3{
+  margin:0 0 14px;
+  font-size:1.05rem;
+}
+
+.option{
+  display:block;
+  padding:10px 14px;
+  margin-bottom:8px;
+  border-radius:12px;
+  cursor:pointer;
+  transition:0.2s;
+  border:1px solid transparent;
+}
+
+.option:hover{
+  background:rgba(255,255,255,0.08);
+}
+
+.option input{
+  margin-right:10px;
+}
+
+.submit-bar{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  background:rgba(10,10,15,0.9);
+  backdrop-filter:blur(20px);
+  border-top:1px solid var(--border);
+  padding:20px;
+  text-align:center;
+}
+
+.submit-btn{
+  padding:16px 46px;
+  font-size:1rem;
+  font-weight:600;
+  border:none;
+  border-radius:16px;
+  cursor:pointer;
+  color:white;
+  background:linear-gradient(135deg,var(--accent),#ff6b6b);
+}
+
+.submit-btn:disabled{
+  opacity:0.5;
+  cursor:not-allowed;
+}
+</style>
 </head>
 
 <body>
 
-<div class="box">
-  <h2>Round 1 – MCQs</h2>
-  <p id="timer">15:00</p>
+<div class="container">
+  <div class="header">
+    <h1>Round 1 – MCQ Test</h1>
+    <div class="timer" id="timer">15:00</div>
+  </div>
 
   <div id="quiz"></div>
+</div>
 
-  <button id="submitBtn" onclick="submitQuiz()">Submit</button>
+<div class="submit-bar">
+  <button id="submitBtn" class="submit-btn" onclick="finish()" disabled>
+    Submit & Save Score
+  </button>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script>
 /* ================= CONFIG ================= */
 
+const SUPABASE_URL = "https://vjkgawgkbehsqqtqwgic.supabase.co";
+const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY_HERE";
+
 const supabaseClient = supabase.createClient(
-  "https://vjkgawgkbehsqqtqwgic.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZqa2dhd2drYmVoc3FxdHF3Z2ljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg0NTI2NDEsImV4cCI6MjA4NDAyODY0MX0.D8rXN-7kn6UFwg6z03Pk_8XlO-G-iVbZwBw1Nx6sa-w"
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
 );
 
 let userId = null;
 
 /* ================= AUTH ================= */
 
-supabaseClient.auth.onAuthStateChange((event, session) => {
-  if (!session) {
+async function loadUser(){
+  const { data } = await supabaseClient.auth.getSession();
+  if(!data.session){
     window.location.href = "index.html";
     return;
   }
-  userId = session.user.id;
-});
+  userId = data.session.user.id;
+  document.getElementById("submitBtn").disabled = false;
+}
 
-/* ================= QUESTIONS (15) ================= */
+document.addEventListener("DOMContentLoaded", loadUser);
+
+/* ================= YOUR MCQS ================= */
 
 const MCQS = [
-  { q:"Which loop in C is guaranteed to execute at least once?", 
-    o:["nested for","do-while","while","for"], 
-    a:1 },
-
-  { q:"Which of the following correctly describes a pointer in C?", 
-    o:["It stores a character","It stores a function","It stores an address","It stores a value"], 
-    a:2 },
-
-  { q:"Which header file is required for printf()?", 
-    o:["math.h","stdio.h","string.h","stdlib.h"], 
-    a:1 },
-
-  { q:"Which operator is used to access the value at an address?", 
-    o:["%","#","&","*"], 
-    a:3 },
-
-  { q:"Which of the following is TRUE about break statement?", 
-    o:["It exits the loop or switch","It exits the program","It ends the function","It skips the current iteration"], 
-    a:0 },
-
-  { q:"Which of the following is a valid C variable name?", 
-    o:["num-1","int","1num","_num"], 
-    a:3 },
-
-  { q:"Which memory is allocated by malloc()?", 
-    o:["Register","Heap","Stack","Static"], 
-    a:1 },
-
-  { q:"Which operator is used for logical AND?", 
-    o:["|","||","&&","&"], 
-    a:2 },
-
-  { q:"Which function is used to compare two strings in C?", 
-    o:["strlen()","strcat()","strcmp()","strcpy()"], 
-    a:2 },
-
-  { q:"What does sizeof(int) return?", 
-    o:["Address","Number of bytes","Number of digits","Number of bits"], 
-    a:1 },
-
-  { q:"Which of the following is a correct comment in C?", 
-    o:["# comment","** comment **","// comment","<!-- comment -->"], 
-    a:2 },
-
-  { q:"What happens if an array index is accessed beyond its size?", 
-    o:["Program terminates safely","Undefined behavior","Compile-time error","Runtime error always"], 
-    a:1 },
-
-  { q:"Which function is used to read a string with spaces in C?", 
-    o:["puts()","scanf()","gets()","fgets()"], 
-    a:3 },
-
-  { q:"What is the default return type of main() in C?", 
-    o:["float","void","char","int"], 
-    a:3 },
-
-  { q:"Which of the following is TRUE about functions in C?", 
-    o:["Functions cannot be recursive","Function arguments are passed by value by default","Functions must always return a value","Functions can return multiple values directly"], 
-    a:1 }
+  { q:"Which loop in C is guaranteed to execute at least once?", o:["nested for","do-while","while","for"], a:1 },
+  { q:"Which of the following correctly describes a pointer in C?", o:["It stores a character","It stores a function","It stores an address","It stores a value"], a:2 },
+  { q:"Which header file is required for printf()?", o:["math.h","stdio.h","string.h","stdlib.h"], a:1 },
+  { q:"Which operator is used to access the value at an address?", o:["%","#","&","*"], a:3 },
+  { q:"Which of the following is TRUE about break statement?", o:["It exits the loop or switch","It exits the program","It ends the function","It skips the current iteration"], a:0 },
+  { q:"Which of the following is a valid C variable name?", o:["num-1","int","1num","_num"], a:3 },
+  { q:"Which memory is allocated by malloc()?", o:["Register","Heap","Stack","Static"], a:1 },
+  { q:"Which operator is used for logical AND?", o:["|","||","&&","&"], a:2 },
+  { q:"Which function is used to compare two strings in C?", o:["strlen()","strcat()","strcmp()","strcpy()"], a:2 },
+  { q:"What does sizeof(int) return?", o:["Address","Number of bytes","Number of digits","Number of bits"], a:1 },
+  { q:"Which of the following is a correct comment in C?", o:["# comment","** comment **","// comment","<!-- comment -->"], a:2 },
+  { q:"What happens if an array index is accessed beyond its size?", o:["Program terminates safely","Undefined behavior","Compile-time error","Runtime error always"], a:1 },
+  { q:"Which function is used to read a string with spaces in C?", o:["puts()","scanf()","gets()","fgets()"], a:3 },
+  { q:"What is the default return type of main() in C?", o:["float","void","char","int"], a:3 },
+  { q:"Which of the following is TRUE about functions in C?", o:["Functions cannot be recursive","Function arguments are passed by value by default","Functions must always return a value","Functions can return multiple values directly"], a:1 }
 ];
 
 const answers = Array(MCQS.length).fill(-1);
@@ -112,66 +184,53 @@ const answers = Array(MCQS.length).fill(-1);
 
 const quiz = document.getElementById("quiz");
 
-MCQS.forEach((q, i) => {
-  const div = document.createElement("div");
-  div.className = "q";
-  div.innerHTML = `<b>Q${i+1}. ${q.q}</b><br>`;
-  q.o.forEach((opt, j) => {
-    div.innerHTML += `
-      <label>
+MCQS.forEach((q,i)=>{
+  const div=document.createElement("div");
+  div.className="question";
+  div.innerHTML=`<h3>Q${i+1}. ${q.q}</h3>`;
+  q.o.forEach((opt,j)=>{
+    div.innerHTML+=`
+      <label class="option">
         <input type="radio" name="q${i}" value="${j}">
         ${opt}
-      </label><br>`;
+      </label>`;
   });
   quiz.appendChild(div);
 });
 
-/* ================= CAPTURE ================= */
-
-document.addEventListener("change", e => {
-  if (e.target.type === "radio") {
-    const i = Number(e.target.name.replace("q",""));
-    answers[i] = Number(e.target.value);
+document.addEventListener("change",e=>{
+  if(e.target.type==="radio"){
+    const i=Number(e.target.name.replace("q",""));
+    answers[i]=Number(e.target.value);
   }
 });
 
 /* ================= TIMER ================= */
 
-let time = 15 * 60;
-const timer = setInterval(() => {
-  const m = Math.floor(time / 60);
-  const s = time % 60;
-  document.getElementById("timer").innerText =
-    `${m}:${s < 10 ? "0"+s : s}`;
+let time=15*60;
+const timer=setInterval(()=>{
+  const m=Math.floor(time/60);
+  const s=time%60;
+  document.getElementById("timer").innerText=`${m}:${s<10?"0"+s:s}`;
   time--;
-  if (time < 0) submitQuiz();
-}, 1000);
+  if(time<0) finish();
+},1000);
 
 /* ================= SUBMIT ================= */
 
-async function submitQuiz() {
+async function finish(){
+  if(!userId) return;
+
   clearInterval(timer);
 
-  let score = 0;
-  MCQS.forEach((q,i) => {
-    if (answers[i] === q.a) score++;
-  });
+  let score=0;
+  MCQS.forEach((q,i)=>{ if(answers[i]===q.a) score++; });
 
-  const { error } = await supabaseClient
-    .from("round1_scores")
-    .upsert({
-      user_id: userId,
-      score: score
-    });
+  await supabaseClient.from("round1_scores").insert([
+    { user_id:userId, score:score }
+  ]);
 
-  if (error) {
-    alert("Error saving score");
-    console.error(error);
-    return;
-  }
-
-  alert("Round 1 submitted! Score: " + score);
-  window.location.href = "dashboard.html";
+  window.location.href="dashboard.html";
 }
 </script>
 
