@@ -858,16 +858,6 @@ const supabaseClient = supabase.createClient(
     SUPABASE_ANON_KEY
 );
 
-/* ================= AUTH ================= */
-
-// If already logged in → go to dashboard
-async function checkAlreadyLoggedIn() {
-    const { data: { user } } = await supabaseClient.auth.getUser();
-    if (user) {
-        window.location.href = "dashboard.html";
-    }
-}
-
 // Handle login
 document.getElementById("loginForm").addEventListener("submit", async function (e) {
     e.preventDefault();

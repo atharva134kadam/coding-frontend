@@ -685,17 +685,15 @@ const supabaseClient = supabase.createClient(
 /* ================= AUTH GUARD ================= */
 
 async function checkLogin() {
-    const { data: { user } } = await supabaseClient.auth.getUser();
-
-    if (!user) {
-        // ❌ Not logged in → go back to login page
-        window.location.href = "index.html";
-        return;
-    }
-
-    // ✅ Logged in → show email
-    document.getElementById("userEmail").innerText = user.email;
+  const { data } = await supabaseClient.auth.getSession();
+  if (!data.session) {
+    window.location.href = "index.html";
+    return;
+  }
+  document.getElementById("userEmail").innerText =
+    data.session.user.email;
 }
+
 
 /* ================= LOGOUT ================= */
 
