@@ -47,7 +47,7 @@
   <div id="quiz"></div>
 
   <center>
-    <button type="button" onclick="finish()">Continue</button>
+    <button id="continueBtn" type="button" disabled>Continue</button>
   </center>
 </div>
 
@@ -74,13 +74,19 @@ let userId = null;
 /* ================= AUTH GUARD ================= */
 
 async function getUser() {
-  const { data: { user } } = await supabaseClient.auth.getUser();
+  const { data: { user }, error } = await supabaseClient.auth.getUser();
+
   if (!user) {
     window.location.href = "index.html";
     return;
   }
+
   userId = user.id;
+
+  // ✅ enable button ONLY after user is ready
+  document.getElementById("continueBtn").disabled = false;
 }
+
 
 /* ================= MCQS ================= */
 
@@ -140,12 +146,22 @@ const timer = setInterval(() => {
 /* ================= SUBMIT ================= */
 
 async function finish() {
+  console.log("✅ Continue clicked");
+
+  if (!userId) {
+    alert("User not loaded yet. Please wait 1–2 seconds.");
+    return;
+  }
+
   clearInterval(timer);
 
   let score = 0;
   MCQS.forEach((q, i) => {
     if (answers[i] === q.answer) score++;
   });
+
+  console.log("📊 Score:", score);
+  console.log("👤 User:", userId);
 
   try {
     const res = await fetch(`${BACKEND_URL}/round1/submit`, {
@@ -157,16 +173,20 @@ async function finish() {
       })
     });
 
+    console.log("🌐 Backend status:", res.status);
+
     if (!res.ok) {
-      throw new Error("Failed to save score");
+      const text = await res.text();
+      console.error(text);
+      throw new Error("Backend failed");
     }
 
-    // ✅ only redirect if backend success
-    window.location.href = "stage2.html";
+    // ✅ FORCE redirect
+    window.location.assign("stage2.html");
 
   } catch (err) {
-    console.error(err);
-    alert("❌ Error saving your score. Please try again or contact admin.");
+    console.error("❌ Submit error:", err);
+    alert("Error saving score. Contact admin.");
   }
 }
 
