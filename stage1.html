@@ -427,6 +427,7 @@
     );
 
     let userId = null;
+    let userEmail = null;
 
     /* ================= AUTH ================= */
     supabaseClient.auth.onAuthStateChange((event, session) => {
@@ -435,6 +436,7 @@
         return;
       }
       userId = session.user.id;
+      userEmail = user.email;
     });
 
     /* ================= QUESTIONS (15) ================= */
@@ -537,6 +539,7 @@
         .from("round1_scores")
         .upsert({
           user_id: userId,
+          email: userEmail,
           score: score
         });
 
