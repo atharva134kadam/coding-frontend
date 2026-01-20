@@ -218,20 +218,38 @@ const timer=setInterval(()=>{
 
 /* ================= SUBMIT ================= */
 
-async function finish(){
-  if(!userId) return;
+async function finish() {
+  if (!userId) {
+    alert("User not authenticated");
+    return;
+  }
 
   clearInterval(timer);
 
-  let score=0;
-  MCQS.forEach((q,i)=>{ if(answers[i]===q.a) score++; });
+  let score = 0;
+  MCQS.forEach((q, i) => {
+    if (answers[i] === q.a) score++;
+  });
 
-  await supabaseClient.from("round1_scores").insert([
-    { user_id:userId, score:score }
-  ]);
+  const { data, error } = await supabaseClient
+    .from("round1_scores")
+    .insert([
+      {
+        user_id: userId,
+        score: score
+      }
+    ]);
 
-  window.location.href="dashboard.html";
+  if (error) {
+    console.error(error);
+    alert("❌ Supabase blocked insert. Check RLS.");
+    return;
+  }
+
+  console.log("✅ Score saved:", data);
+  window.location.href = "dashboard.html";
 }
+
 </script>
 
 </body>
