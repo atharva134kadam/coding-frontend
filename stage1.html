@@ -45,21 +45,65 @@ supabaseClient.auth.onAuthStateChange((event, session) => {
 /* ================= QUESTIONS (15) ================= */
 
 const MCQS = [
-  { q:"Insertion sort worst case?", o:["O(n)","O(n log n)","O(n²)","O(log n)"], a:2 },
-  { q:"FIFO structure?", o:["Stack","Queue","Tree","Graph"], a:1 },
-  { q:"Binary search needs?", o:["Sorted","Unsorted","Stack","Queue"], a:0 },
-  { q:"BFS complexity?", o:["O(V)","O(V+E)","O(V²)","O(E log V)"], a:1 },
-  { q:"Bubble sort best case?", o:["O(n²)","O(n)","O(log n)","O(n log n)"], a:1 },
-  { q:"LIFO structure?", o:["Queue","Tree","Stack","Graph"], a:2 },
-  { q:"Heap is?", o:["Tree","Graph","Array","Stack"], a:0 },
-  { q:"DFS uses?", o:["Queue","Stack","Heap","Array"], a:1 },
-  { q:"Merge sort complexity?", o:["O(n²)","O(n log n)","O(n)","O(log n)"], a:1 },
-  { q:"Hash table avg search?", o:["O(1)","O(n)","O(log n)","O(n log n)"], a:0 },
-  { q:"BST inorder gives?", o:["Sorted","Reverse","Random","None"], a:0 },
-  { q:"Graph edges stored in?", o:["Adj list","Array","Stack","Heap"], a:0 },
-  { q:"Queue removal?", o:["Front","Rear","Any","None"], a:0 },
-  { q:"Recursion uses?", o:["Queue","Stack","Heap","Array"], a:1 },
-  { q:"Quick sort worst?", o:["O(n)","O(n log n)","O(n²)","O(log n)"], a:2 }
+  { q:"Which loop in C is guaranteed to execute at least once?", 
+    o:["nested for","do-while","while","for"], 
+    a:1 },
+
+  { q:"Which of the following correctly describes a pointer in C?", 
+    o:["It stores a character","It stores a function","It stores an address","It stores a value"], 
+    a:2 },
+
+  { q:"Which header file is required for printf()?", 
+    o:["math.h","stdio.h","string.h","stdlib.h"], 
+    a:1 },
+
+  { q:"Which operator is used to access the value at an address?", 
+    o:["%","#","&","*"], 
+    a:3 },
+
+  { q:"Which of the following is TRUE about break statement?", 
+    o:["It exits the loop or switch","It exits the program","It ends the function","It skips the current iteration"], 
+    a:0 },
+
+  { q:"Which of the following is a valid C variable name?", 
+    o:["num-1","int","1num","_num"], 
+    a:3 },
+
+  { q:"Which memory is allocated by malloc()?", 
+    o:["Register","Heap","Stack","Static"], 
+    a:1 },
+
+  { q:"Which operator is used for logical AND?", 
+    o:["|","||","&&","&"], 
+    a:2 },
+
+  { q:"Which function is used to compare two strings in C?", 
+    o:["strlen()","strcat()","strcmp()","strcpy()"], 
+    a:2 },
+
+  { q:"What does sizeof(int) return?", 
+    o:["Address","Number of bytes","Number of digits","Number of bits"], 
+    a:1 },
+
+  { q:"Which of the following is a correct comment in C?", 
+    o:["# comment","** comment **","// comment","<!-- comment -->"], 
+    a:2 },
+
+  { q:"What happens if an array index is accessed beyond its size?", 
+    o:["Program terminates safely","Undefined behavior","Compile-time error","Runtime error always"], 
+    a:1 },
+
+  { q:"Which function is used to read a string with spaces in C?", 
+    o:["puts()","scanf()","gets()","fgets()"], 
+    a:3 },
+
+  { q:"What is the default return type of main() in C?", 
+    o:["float","void","char","int"], 
+    a:3 },
+
+  { q:"Which of the following is TRUE about functions in C?", 
+    o:["Functions cannot be recursive","Function arguments are passed by value by default","Functions must always return a value","Functions can return multiple values directly"], 
+    a:1 }
 ];
 
 const answers = Array(MCQS.length).fill(-1);
