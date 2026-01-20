@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Round 2 – Logic Decryption</title>
+  <style>
+    body {
+      background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+      font-family: Arial, sans-serif;
+      color: white;
+    }
+    .box {
+      max-width: 900px;
+      margin: 30px auto;
+      background: #102a43;
+      padding: 25px;
+      border-radius: 15px;
+    }
+    pre {
+      background: #061826;
+      padding: 15px;
+      border-radius: 8px;
+      color: #00ffcc;
+      user-select: none;
+    }
+    input {
+      padding: 8px;
+      margin-top: 8px;
+      width: 200px;
+    }
+    button {
+      background: #00b4d8;
+      border: none;
+      padding: 10px 25px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 6px;
+    }
+    hr {
+      border: 1px solid #1e3a5f;
+      margin: 20px 0;
+    }
+    #timer {
+      font-size: 18px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="box">
+  <h2>🔐 Round 2: Logic Decryption</h2>
+  <p id="timer">20:00</p>
+
+  <div id="questions"></div>
+
+  <center>
+    <button onclick="finish()">Continue</button>
+  </center>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+/* ================= CONFIG ================= */
+
+// 🔐 Supabase (PUBLIC ANON KEY ONLY)
+const SUPABASE_URL = "https://vjkgawgkbehsqqtqwgic.supabase.co";
+const SUPABASE_ANON_KEY = "PASTE_YOUR_ANON_KEY_HERE"; // 👈 replace only this
+
+// 🌐 Backend (Render)
+const BACKEND_URL = "https://coding-backend-iej3.onrender.com";
+
+// Initialize Supabase
+const supabaseClient = supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);
+
+let userId = null;
+
+/* ================= AUTH GUARD ================= */
+
+async function getUser() {
+  const { data: { user } } = await supabaseClient.auth.getUser();
+  if (!user) {
+    window.location.href = "index.html";
+    return;
+  }
+  userId = user.id;
+}
+
+/* ================= ROUND 2 QUESTIONS ================= */
+
+const QUESTIONS = [
+  {
+    code: `x = 1
+y = 2
+for i in range(3):
+    x = x + y
+    y = y + 1
+print(x)`,
+    answer: "10",
+    marks: 10
+  },
+  {
+    code: `a = 10
+b = 0
+while a > 0:
+    if a % 3 == 0:
+        b = b + a
+    a = a - 1
+print(b)`,
+    answer: "18",
+    marks: 10
+  },
+  {
+    code: `n = 5
+sum = 0
+for i in range(1, ___):
+    sum = sum + i
+print(sum)`,
+    answer: "n+1",
+    marks: 10
+  },
+  {
+    code: `x = 7
+if x % ___ == 0:
+    print("Even")
+else:
+    print("Odd")`,
+    answer: "2",
+    marks: 10
+  }
+];
+
+const answers = Array(QUESTIONS.length).fill("");
+
+/* ================= RENDER QUESTIONS ================= */
+
+const container = document.getElementById("questions");
+
+QUESTIONS.forEach((q, i) => {
+  container.innerHTML += `
+    <div>
+      <h3>Question ${i + 1}</h3>
+      <pre>${q.code}</pre>
+      Your Answer:
+      <input
+        type="text"
+        oninput="answers[${i}] = this.value.trim()">
+      <hr>
+    </div>
+  `;
+});
+
+/* ================= TIMER ================= */
+
+let time = 20 * 60;
+
+const timer = setInterval(() => {
+  const m = Math.floor(time / 60);
+  const s = time % 60;
+  document.getElementById("timer").innerText =
+    `Time Left: ${m}:${s < 10 ? "0" + s : s}`;
+  time--;
+  if (time < 0) finish();
+}, 1000);
+
+/* ================= SUBMIT ================= */
+
+async function finish() {
+  clearInterval(timer);
+
+  let score = 0;
+  QUESTIONS.forEach((q, i) => {
+    if (answers[i] === q.answer) score += q.marks;
+  });
+
+  await fetch(`${BACKEND_URL}/round2/submit`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      user_id: userId,
+      score: score
+    })
+  });
+
+  // Final redirect (can be dashboard / results page)
+  window.location.href = "dashboard.html";
+}
+
+/* ================= INIT ================= */
+
+document.addEventListener("DOMContentLoaded", async () => {
+  await getUser();
+});
+</script>
+</body>
+</html>

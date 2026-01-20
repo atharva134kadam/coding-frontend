@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Round 1 – MCQ</title>
+  <style>
+    body {
+      background: linear-gradient(135deg,#6a11cb,#2575fc);
+      font-family: Arial, sans-serif;
+      color: white;
+    }
+    .box {
+      max-width: 900px;
+      margin: 30px auto;
+      background: #2b0f5b;
+      padding: 25px;
+      border-radius: 15px;
+    }
+    .q {
+      background: #3c1577;
+      padding: 12px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+    }
+    button {
+      background: #9b5de5;
+      color: white;
+      padding: 10px 25px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    #timer {
+      font-size: 18px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="box">
+  <h2>🧠 Round 1: DSA MCQs</h2>
+  <p id="timer">15:00</p>
+
+  <div id="quiz"></div>
+
+  <center>
+    <button type="button" onclick="finish()">Continue</button>
+  </center>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+/* ================= CONFIG ================= */
+
+// 🔐 Supabase (PUBLIC ANON KEY ONLY)
+const SUPABASE_URL = "https://vjkgawgkbehsqqtqwgic.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZqa2dhd2drYmVoc3FxdHF3Z2ljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg0NTI2NDEsImV4cCI6MjA4NDAyODY0MX0.D8rXN-7kn6UFwg6z03Pk_8XlO-G-iVbZwBw1Nx6sa-w"; // 👈 replace only this
+
+// 🌐 Backend (Render)
+const BACKEND_URL = "https://coding-backend-iej3.onrender.com";
+
+// Initialize Supabase
+const supabaseClient = supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);
+
+let userId = null;
+
+/* ================= AUTH GUARD ================= */
+
+async function getUser() {
+  const { data: { user } } = await supabaseClient.auth.getUser();
+  if (!user) {
+    window.location.href = "index.html";
+    return;
+  }
+  userId = user.id;
+}
+
+/* ================= MCQS ================= */
+
+const MCQS = [
+  { q: "Insertion sort worst case?", options: ["O(n)", "O(n log n)", "O(n²)", "O(log n)"], answer: 2 },
+  { q: "Which data structure follows FIFO?", options: ["Stack", "Queue", "Tree", "Graph"], answer: 1 },
+  { q: "Binary search requires the array to be?", options: ["Sorted", "Unsorted", "Stack", "Queue"], answer: 0 },
+  { q: "Time complexity of BFS?", options: ["O(V)", "O(V+E)", "O(V²)", "O(E log V)"], answer: 1 },
+  { q: "Bubble sort best case complexity?", options: ["O(n²)", "O(n)", "O(log n)", "O(n log n)"], answer: 1 }
+];
+
+const answers = Array(MCQS.length).fill(-1);
+
+/* ================= RENDER QUESTIONS ================= */
+
+const quiz = document.getElementById("quiz");
+
+MCQS.forEach((q, i) => {
+  const div = document.createElement("div");
+  div.className = "q";
+  div.innerHTML = `<b>Q${i + 1}. ${q.q}</b><br>`;
+
+  q.options.forEach((opt, j) => {
+    div.innerHTML += `
+      <label>
+        <input type="radio" name="q${i}" value="${j}">
+        ${opt}
+      </label><br>
+    `;
+  });
+
+  quiz.appendChild(div);
+});
+
+/* ================= CAPTURE ANSWERS ================= */
+
+document.addEventListener("change", (e) => {
+  if (e.target.type === "radio") {
+    const index = Number(e.target.name.replace("q", ""));
+    answers[index] = Number(e.target.value);
+  }
+});
+
+/* ================= TIMER ================= */
+
+let time = 15 * 60;
+
+const timer = setInterval(() => {
+  const m = Math.floor(time / 60);
+  const s = time % 60;
+  document.getElementById("timer").innerText =
+    `Time Left: ${m}:${s < 10 ? "0" + s : s}`;
+  time--;
+  if (time < 0) finish();
+}, 1000);
+
+/* ================= SUBMIT ================= */
+
+async function finish() {
+  clearInterval(timer);
+
+  let score = 0;
+  MCQS.forEach((q, i) => {
+    if (answers[i] === q.answer) score++;
+  });
+
+  await fetch(`${BACKEND_URL}/round1/submit`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      user_id: userId,
+      score: score
+    })
+  });
+
+  // Go to next stage
+  window.location.href = "stage2.html";
+}
+
+/* ================= INIT ================= */
+
+document.addEventListener("DOMContentLoaded", async () => {
+  await getUser();
+});
+</script>
+
+
+</body>
+</html>
