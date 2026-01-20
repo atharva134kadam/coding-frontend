@@ -1,161 +1,116 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Round 1 – MCQ</title>
+  <title>Round 1 – MCQs</title>
   <style>
-    body {
-      background: linear-gradient(135deg,#6a11cb,#2575fc);
-      font-family: Arial, sans-serif;
-      color: white;
-    }
-    .box {
-      max-width: 900px;
-      margin: 30px auto;
-      background: #2b0f5b;
-      padding: 25px;
-      border-radius: 15px;
-    }
-    .q {
-      background: #3c1577;
-      padding: 12px;
-      margin-bottom: 15px;
-      border-radius: 8px;
-    }
-    button {
-      background: #9b5de5;
-      color: white;
-      padding: 10px 25px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 16px;
-    }
-    button:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-    #timer {
-      font-size: 18px;
-      margin-bottom: 20px;
-      text-align: center;
-    }
+    body { font-family: Arial; background:#222; color:#fff; }
+    .box { max-width:900px; margin:auto; background:#333; padding:20px; }
+    .q { background:#444; padding:10px; margin-bottom:10px; }
+    button { padding:10px 20px; font-size:16px; }
   </style>
 </head>
 
 <body>
 
 <div class="box">
-  <h2>🧠 Round 1: DSA MCQs</h2>
+  <h2>Round 1 – MCQs</h2>
   <p id="timer">15:00</p>
 
   <div id="quiz"></div>
 
-  <center>
-    <button id="continueBtn" onclick="finish()" disabled>
-      Continue
-    </button>
-  </center>
+  <button id="submitBtn" onclick="submitQuiz()">Submit</button>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <script>
 /* ================= CONFIG ================= */
 
-const SUPABASE_URL = "https://vjkgawgkbehsqqtqwgic.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZqa2dhd2drYmVoc3FxdHF3Z2ljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg0NTI2NDEsImV4cCI6MjA4NDAyODY0MX0.D8rXN-7kn6UFwg6z03Pk_8XlO-G-iVbZwBw1Nx6sa-w"; // 👈 paste anon key
-
 const supabaseClient = supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_ANON_KEY
+  "YOUR_SUPABASE_URL",
+  "YOUR_ANON_KEY"
 );
 
 let userId = null;
 
 /* ================= AUTH ================= */
 
-async function loadUser() {
-  const { data } = await supabaseClient.auth.getSession();
-
-  if (!data.session) {
+supabaseClient.auth.onAuthStateChange((event, session) => {
+  if (!session) {
     window.location.href = "index.html";
     return;
   }
+  userId = session.user.id;
+});
 
-  userId = data.session.user.id;
-  document.getElementById("continueBtn").disabled = false;
-}
-
-document.addEventListener("DOMContentLoaded", loadUser);
-
-/* ================= MCQS ================= */
+/* ================= QUESTIONS (15) ================= */
 
 const MCQS = [
-  { q: "Insertion sort worst case?", options: ["O(n)", "O(n log n)", "O(n²)", "O(log n)"], answer: 2 },
-  { q: "Which data structure follows FIFO?", options: ["Stack", "Queue", "Tree", "Graph"], answer: 1 },
-  { q: "Binary search requires the array to be?", options: ["Sorted", "Unsorted", "Stack", "Queue"], answer: 0 },
-  { q: "Time complexity of BFS?", options: ["O(V)", "O(V+E)", "O(V²)", "O(E log V)"], answer: 1 },
-  { q: "Bubble sort best case complexity?", options: ["O(n²)", "O(n)", "O(log n)", "O(n log n)"], answer: 1 }
+  { q:"Insertion sort worst case?", o:["O(n)","O(n log n)","O(n²)","O(log n)"], a:2 },
+  { q:"FIFO structure?", o:["Stack","Queue","Tree","Graph"], a:1 },
+  { q:"Binary search needs?", o:["Sorted","Unsorted","Stack","Queue"], a:0 },
+  { q:"BFS complexity?", o:["O(V)","O(V+E)","O(V²)","O(E log V)"], a:1 },
+  { q:"Bubble sort best case?", o:["O(n²)","O(n)","O(log n)","O(n log n)"], a:1 },
+  { q:"LIFO structure?", o:["Queue","Tree","Stack","Graph"], a:2 },
+  { q:"Heap is?", o:["Tree","Graph","Array","Stack"], a:0 },
+  { q:"DFS uses?", o:["Queue","Stack","Heap","Array"], a:1 },
+  { q:"Merge sort complexity?", o:["O(n²)","O(n log n)","O(n)","O(log n)"], a:1 },
+  { q:"Hash table avg search?", o:["O(1)","O(n)","O(log n)","O(n log n)"], a:0 },
+  { q:"BST inorder gives?", o:["Sorted","Reverse","Random","None"], a:0 },
+  { q:"Graph edges stored in?", o:["Adj list","Array","Stack","Heap"], a:0 },
+  { q:"Queue removal?", o:["Front","Rear","Any","None"], a:0 },
+  { q:"Recursion uses?", o:["Queue","Stack","Heap","Array"], a:1 },
+  { q:"Quick sort worst?", o:["O(n)","O(n log n)","O(n²)","O(log n)"], a:2 }
 ];
 
 const answers = Array(MCQS.length).fill(-1);
 
-/* ================= RENDER QUESTIONS ================= */
+/* ================= RENDER ================= */
 
 const quiz = document.getElementById("quiz");
 
 MCQS.forEach((q, i) => {
   const div = document.createElement("div");
   div.className = "q";
-  div.innerHTML = `<b>Q${i + 1}. ${q.q}</b><br>`;
-
-  q.options.forEach((opt, j) => {
+  div.innerHTML = `<b>Q${i+1}. ${q.q}</b><br>`;
+  q.o.forEach((opt, j) => {
     div.innerHTML += `
       <label>
         <input type="radio" name="q${i}" value="${j}">
         ${opt}
-      </label><br>
-    `;
+      </label><br>`;
   });
-
   quiz.appendChild(div);
 });
 
-/* ================= CAPTURE ANSWERS ================= */
+/* ================= CAPTURE ================= */
 
-document.addEventListener("change", (e) => {
+document.addEventListener("change", e => {
   if (e.target.type === "radio") {
-    const index = Number(e.target.name.replace("q", ""));
-    answers[index] = Number(e.target.value);
+    const i = Number(e.target.name.replace("q",""));
+    answers[i] = Number(e.target.value);
   }
 });
 
 /* ================= TIMER ================= */
 
 let time = 15 * 60;
-
 const timer = setInterval(() => {
   const m = Math.floor(time / 60);
   const s = time % 60;
   document.getElementById("timer").innerText =
-    `Time Left: ${m}:${s < 10 ? "0" + s : s}`;
+    `${m}:${s < 10 ? "0"+s : s}`;
   time--;
-  if (time < 0) finish();
+  if (time < 0) submitQuiz();
 }, 1000);
 
-/* ================= SUBMIT (SUPABASE ONLY) ================= */
+/* ================= SUBMIT ================= */
 
-async function finish() {
-  if (!userId) {
-    alert("User not loaded yet");
-    return;
-  }
-
+async function submitQuiz() {
   clearInterval(timer);
 
   let score = 0;
-  MCQS.forEach((q, i) => {
-    if (answers[i] === q.answer) score++;
+  MCQS.forEach((q,i) => {
+    if (answers[i] === q.a) score++;
   });
 
   const { error } = await supabaseClient
@@ -166,13 +121,13 @@ async function finish() {
     });
 
   if (error) {
+    alert("Error saving score");
     console.error(error);
-    alert("❌ Error saving score");
     return;
   }
 
-  // ✅ NEXT ROUND
-  window.location.href = "stage2.html";
+  alert("Round 1 submitted! Score: " + score);
+  window.location.href = "dashboard.html";
 }
 </script>
 
