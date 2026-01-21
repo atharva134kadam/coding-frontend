@@ -696,6 +696,34 @@
       overlay.style.display = "none";
     });
 
+    document.addEventListener("keydown", function (e) {
+
+      // Print Screen
+      if (e.key === "PrintScreen") {
+        e.preventDefault();
+        alert("Screenshots are disabled during the exam.");
+      }
+
+      // Ctrl + PrintScreen
+      if (e.ctrlKey && e.key === "PrintScreen") {
+        e.preventDefault();
+        alert("Screenshots are disabled during the exam.");
+      }
+
+      // Windows Snipping Tool (Win + Shift + S)
+      if (e.shiftKey && e.metaKey && e.key.toLowerCase() === "s") {
+        e.preventDefault();
+        alert("Screenshots are disabled during the exam.");
+      }
+
+      // Mac screenshots
+      if (e.metaKey && e.shiftKey && (e.key === "3" || e.key === "4" || e.key === "5")) {
+        e.preventDefault();
+        alert("Screenshots are disabled during the exam.");
+      }
+    });
+
+    
     /* ================= SUBMIT ================= */
     async function submitQuiz() {
       clearInterval(timer);
