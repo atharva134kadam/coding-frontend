@@ -18,6 +18,9 @@
       min-height: 100vh;
       overflow-x: hidden;
       position: relative;
+      -webkit-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
     }
 
     /* Techy background with subtle grid */
@@ -651,6 +654,22 @@
 
     /* ================= Copy ================= */
     const overlay = document.getElementById("blurOverlay");
+
+    /* DISABLE COPY  */
+    document.addEventListener("keydown", function (e) {
+
+      // Ctrl + C / Cmd + C
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "c") {
+        e.preventDefault();
+        alert("Copying is disabled during the exam.");
+      }
+
+      // Ctrl + A / Cmd + A (Select all)
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "a") {
+        e.preventDefault();
+        alert("Selecting text is disabled during the exam.");
+      }
+    });
 
     /*DISABLE RIGHT CLICK */
     document.addEventListener("contextmenu", function (e) {
