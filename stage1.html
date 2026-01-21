@@ -478,6 +478,12 @@
       z-index: 999999;
       display: none;
     }
+
+    .exam-hidden {
+      filter: blur(18px);
+      pointer-events: none;
+      user-select: none;
+    }
   </style>
 </head>
 
@@ -652,78 +658,68 @@
       if (time < 0) submitQuiz();
     }, 1000);
 
-    /* ================= Copy ================= */
+    /* ================= SECURITY ================= */
+
     const overlay = document.getElementById("blurOverlay");
+    const examBox = document.querySelector(".box");
 
-    /* DISABLE COPY  */
-    document.addEventListener("keydown", function (e) {
-
-      // Ctrl + C / Cmd + C
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "c") {
+    /* ---------- DISABLE COPY / SELECT ---------- */
+    document.addEventListener("keydown", e => {
+      if ((e.ctrlKey || e.metaKey) && ["c", "a", "x", "v"].includes(e.key.toLowerCase())) {
         e.preventDefault();
         alert("Copying is disabled during the exam.");
       }
-
-      // Ctrl + A / Cmd + A (Select all)
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "a") {
-        e.preventDefault();
-        alert("Selecting text is disabled during the exam.");
-      }
     });
 
-    /*DISABLE RIGHT CLICK */
-    document.addEventListener("contextmenu", function (e) {
+    /* ---------- DISABLE RIGHT CLICK ---------- */
+    document.addEventListener("contextmenu", e => {
       e.preventDefault();
-      alert("Right click is disabled during the exam.");
     });
 
-    /* TAB SWITCH / MINIMIZE */
+    /* ---------- TAB SWITCH / MINIMIZE ---------- */
     document.addEventListener("visibilitychange", () => {
-      if (document.visibilityState !== "visible") {
-        overlay.style.display = "block";
+      if (document.hidden) {
+        activateViolation();
       } else {
-        overlay.style.display = "none";
+        restoreExam();
       }
     });
 
-    /* WINDOW BLUR (MOST IMPORTANT) */
-    window.addEventListener("blur", () => {
-      overlay.style.display = "block";
-    });
+    /* ---------- WINDOW BLUR ---------- */
+    window.addEventListener("blur", activateViolation);
+    window.addEventListener("focus", restoreExam);
 
-    /* WINDOW FOCUS BACK */
-    window.addEventListener("focus", () => {
-      overlay.style.display = "none";
-    });
+    /* ---------- SCREENSHOT DETECTION (BEST POSSIBLE) ---------- */
+    document.addEventListener("keydown", e => {
 
-    document.addEventListener("keydown", function (e) {
-
-      // Print Screen
+      // Print Screen (Windows)
       if (e.key === "PrintScreen") {
-        e.preventDefault();
-        alert("Screenshots are disabled during the exam.");
+        activateViolation();
       }
 
-      // Ctrl + PrintScreen
-      if (e.ctrlKey && e.key === "PrintScreen") {
-        e.preventDefault();
-        alert("Screenshots are disabled during the exam.");
-      }
-
-      // Windows Snipping Tool (Win + Shift + S)
+      // Win + Shift + S (Snipping Tool)
       if (e.shiftKey && e.metaKey && e.key.toLowerCase() === "s") {
-        e.preventDefault();
-        alert("Screenshots are disabled during the exam.");
+        activateViolation();
       }
 
       // Mac screenshots
-      if (e.metaKey && e.shiftKey && (e.key === "3" || e.key === "4" || e.key === "5")) {
-        e.preventDefault();
-        alert("Screenshots are disabled during the exam.");
+      if (e.metaKey && e.shiftKey && ["3", "4", "5"].includes(e.key)) {
+        activateViolation();
       }
+
     });
 
-    
+    /* ---------- FUNCTIONS ---------- */
+    function activateViolation() {
+      overlay.style.display = "block";
+      examBox.classList.add("exam-hidden");
+    }
+
+    function restoreExam() {
+      overlay.style.display = "none";
+      examBox.classList.remove("exam-hidden");
+    }
+
     /* ================= SUBMIT ================= */
     async function submitQuiz() {
       clearInterval(timer);
