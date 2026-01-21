@@ -555,6 +555,84 @@
       if (time < 0) submitQuiz();
     }, 1000);
 
+     /* ================= SECURITY ================= */
+
+    const overlay = document.getElementById("blurOverlay");
+    const examBox = document.querySelector(".box");
+    let violationCount = 0;
+    const MAX_VIOLATIONS = 2;
+
+
+    /* ---------- DISABLE COPY / SELECT ---------- */
+    document.addEventListener("keydown", e => {
+      if ((e.ctrlKey || e.metaKey) && ["c", "a", "x", "v"].includes(e.key.toLowerCase())) {
+        e.preventDefault();
+        alert("Copying is disabled during the exam.");
+      }
+    });
+
+    /* ---------- DISABLE RIGHT CLICK ---------- */
+    document.addEventListener("contextmenu", e => {
+      e.preventDefault();
+    });
+
+    /* ---------- TAB SWITCH / MINIMIZE ---------- */
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) {
+        activateViolation();
+      } else {
+        restoreExam();
+      }
+    });
+
+    /* ---------- WINDOW BLUR ---------- */
+    window.addEventListener("blur", activateViolation);
+    window.addEventListener("focus", restoreExam);
+
+    /* ---------- SCREENSHOT DETECTION (BEST POSSIBLE) ---------- */
+    document.addEventListener("keydown", e => {
+
+      // Print Screen (Windows)
+      if (e.key === "PrintScreen") {
+        activateViolation();
+      }
+
+      // Win + Shift + S (Snipping Tool)
+      if (e.shiftKey && e.metaKey && e.key.toLowerCase() === "s") {
+        activateViolation();
+      }
+
+      // Mac screenshots
+      if (e.metaKey && e.shiftKey && ["3", "4", "5"].includes(e.key)) {
+        activateViolation();
+      }
+
+    });
+
+    /* ---------- FUNCTIONS ---------- */
+    function activateViolation() {
+      violationCount++;
+
+      overlay.style.display = "block";
+      examBox.classList.add("exam-hidden");
+
+      if (violationCount >= MAX_VIOLATIONS) {
+        alert("⚠ Multiple violations detected. You are being redirected.");
+
+        // Optional: auto-submit before redirect
+        // submitQuiz();
+
+        setTimeout(() => {
+          window.location.href = "dashboard.html";
+        }, 1000);
+      }
+    }
+
+    function restoreExam() {
+      overlay.style.display = "none";
+      examBox.classList.remove("exam-hidden");
+    }
+    
     /* ================= SUBMIT ================= */
     async function submitQuiz() {
       clearInterval(timer);
