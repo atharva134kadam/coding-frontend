@@ -662,6 +662,9 @@
 
     const overlay = document.getElementById("blurOverlay");
     const examBox = document.querySelector(".box");
+    let violationCount = 0;
+    const MAX_VIOLATIONS = 2;
+
 
     /* ---------- DISABLE COPY / SELECT ---------- */
     document.addEventListener("keydown", e => {
@@ -711,8 +714,21 @@
 
     /* ---------- FUNCTIONS ---------- */
     function activateViolation() {
+      violationCount++;
+
       overlay.style.display = "block";
       examBox.classList.add("exam-hidden");
+
+      if (violationCount >= MAX_VIOLATIONS) {
+        alert("⚠ Multiple violations detected. You are being redirected.");
+
+        // Optional: auto-submit before redirect
+        // submitQuiz();
+
+        setTimeout(() => {
+          window.location.href = "dashboard.html";
+        }, 1000);
+      }
     }
 
     function restoreExam() {
