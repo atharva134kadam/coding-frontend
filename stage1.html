@@ -526,6 +526,35 @@
       if (time < 0) submitQuiz();
     }, 1000);
 
+    /* ================= Copy ================= */
+    document.addEventListener("contextmenu", e => e.preventDefault());
+    
+    document.addEventListener("keydown", e => {
+  // Windows / Linux
+  if (e.key === "PrintScreen") {
+    e.preventDefault();
+    alert("Screenshots are disabled!");
+  }
+
+  // Mac screenshot shortcuts
+  if (
+    (e.metaKey && e.shiftKey && (e.key === "3" || e.key === "4")) ||
+    (e.ctrlKey && e.shiftKey && e.key === "I") || // DevTools
+    (e.ctrlKey && e.key === "u") // View source
+  ) {
+    e.preventDefault();
+    alert("This action is disabled during the exam.");
+  }
+});
+
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) {
+    document.body.style.filter = "blur(12px)";
+  } else {
+    document.body.style.filter = "none";
+  }
+});
+
     /* ================= SUBMIT ================= */
     async function submitQuiz() {
       clearInterval(timer);
