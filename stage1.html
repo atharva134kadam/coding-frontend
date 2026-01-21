@@ -652,6 +652,12 @@
     /* ================= Copy ================= */
     const overlay = document.getElementById("blurOverlay");
 
+    /*DISABLE RIGHT CLICK */
+    document.addEventListener("contextmenu", function (e) {
+      e.preventDefault();
+      alert("Right click is disabled during the exam.");
+    });
+
     /* TAB SWITCH / MINIMIZE */
     document.addEventListener("visibilitychange", () => {
       if (document.visibilityState !== "visible") {
