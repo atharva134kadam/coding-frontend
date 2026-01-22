@@ -643,7 +643,7 @@
       });
 
       const { error } = await supabaseClient
-        .from("round1_scores")
+        .from("round1_scores_sy")
         .upsert({
           user_id: userId,
           score: score
