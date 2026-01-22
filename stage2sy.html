@@ -470,50 +470,99 @@
 
     /* ================= ROUND 2 QUESTIONS ================= */
     const QUESTIONS = [
-      {
-        type: "output",
-        code: `x = 1
+  /* ================= SIMPLE → MEDIUM ================= */
+
+  {
+    type: "output",
+    code: `x = 3
 y = 2
-for i in range(3):
-    x = x + y
-    y = y + 1
+x = x + y * 2
 print(x)`,
-        answer: "10",
-        marks: 10
-      },
-      {
-        type: "output",
-        code: `a = 10
-b = 0
-while a > 0:
-    if a % 3 == 0:
-        b = b + a
-    a = a - 1
-print(b)`,
-        answer: "18",
-        marks: 10
-      },
-      {
-        type: "fill",
-        code: `n = 5
-sum = 0
-for i in range(1, ___):
-    sum = sum + i
-print(sum)`,
-        answer: "n+1",
-        marks: 10
-      },
-      {
-        type: "fill",
-        code: `x = 7
-if x % ___ == 0:
-    print("Even")
-else:
-    print("Odd")`,
-        answer: "2",
-        marks: 10
-      }
-    ];
+    answer: "7",
+    marks: 10
+  },
+
+  {
+    type: "output",
+    code: `int x = 5;
+int y = 2;
+cout << x % y;`,
+    answer: "1",
+    marks: 10
+  },
+
+  {
+    type: "fill",
+    code: `x = 6
+if x ___ 2 == 0:
+    print("Even")`,
+    answer: "%",
+    marks: 10
+  },
+
+  {
+    type: "output",
+    code: `int a = 3;
+int b = 4;
+cout << a * b;`,
+    answer: "12",
+    marks: 10
+  },
+
+  {
+    type: "fill",
+    code: `for(int i = 1; i ___ 5; i++)
+    cout << i;`,
+    answer: "<=",
+    marks: 10
+  },
+
+  /* ================= MEDIUM → TRICKY ================= */
+
+  {
+    type: "output",
+    code: `x = 1
+for i in range(1, 5):
+    x = x * i
+print(x)`,
+    answer: "24",
+    marks: 10
+  },
+
+  {
+    type: "output",
+    code: `int x = 5;
+cout << ++x + x++;`,
+    answer: "12",
+    marks: 10
+  },
+
+  {
+    type: "fill",
+    code: `int a = 10;
+int *p = ___;
+cout << *p;`,
+    answer: "&a",
+    marks: 10
+  },
+
+  {
+    type: "output",
+    code: `x = [1,2,3]
+y = x
+y.append(4)
+print(len(x))`,
+    answer: "4",
+    marks: 10
+  },
+
+  {
+    type: "fill",
+    code: `cout << sizeof(___);`,
+    answer: "int",
+    marks: 10
+  }
+];
 
     const answers = Array(QUESTIONS.length).fill("");
 
