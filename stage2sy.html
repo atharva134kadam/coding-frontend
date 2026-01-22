@@ -459,11 +459,13 @@
     );
 
     let userId = null;
+    let userEmail = null;
 
     async function getUser() {
       const { data: { user } } = await supabaseClient.auth.getUser();
       if (!user) window.location.href = "/";
       userId = user.id;
+      userEmail = user.email;
     }
 
     /* ================= ROUND 2 QUESTIONS ================= */
@@ -562,6 +564,7 @@ else:
         .from("round2_scores")
         .upsert({
           user_id: userId,
+          email: userEmail,
           score: score,
           submitted_at: new Date().toISOString()
         });
