@@ -561,7 +561,7 @@ else:
 
       // Save score to Supabase
       const { error } = await supabaseClient
-        .from("round2_scores")
+        .from("round2_scores_sy")
         .upsert({
           user_id: userId,
           email: userEmail,
