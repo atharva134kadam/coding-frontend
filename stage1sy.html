@@ -646,6 +646,7 @@
         .from("round1_scores_sy")
         .upsert({
           user_id: userId,
+          email: userEmail,
           score: score
         });
 
